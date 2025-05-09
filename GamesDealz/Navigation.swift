@@ -31,25 +31,44 @@ public struct Navigation {
             SplashScreenReducer()
         }
         
-        Reduce { _, action in
+        Reduce { state, action in
             switch action {
+            case .splashScreenAction(.delegate(let action)):
+                switch action {
+                case .openHomeScreen:
+                    state.path.append(.homeScreen(.init()))
+                    return .none
+                case .showAlert:
+                    return .none
+                }
             case .splashScreenAction:
                 return .none
             case .path:
                 return .none
             }
         }
+        .forEach(\.path, action: \.path) {
+            Path()
+        }
     }
     
     @Reducer
     public struct Path {
         @ObservableState
-        public enum State: Equatable {}
+        public enum State: Equatable {
+            case homeScreen(HomeReducer.State = .init())
+        }
         
-        public enum Action: Equatable {}
+        public enum Action: Equatable {
+            case homeScreen(HomeReducer.Action)
+        }
         
         public init() {}
         
-        public var body: some Reducer<State, Action> {}
+        public var body: some Reducer<State, Action> {
+            Scope(state: \.homeScreen, action: \.homeScreen) {
+                HomeReducer()
+            }
+        }
     }
 }

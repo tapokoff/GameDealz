@@ -21,7 +21,15 @@ public struct NavigationRootView: View {
                 self.store.scope(state: \.path, action: \.path)
             ) {
                 SplashScreenView(store: store.scope(state: \.splashScreenState, action: \.splashScreenAction))
-            } destination: { _ in
+            } destination: {
+                switch $0 {
+                case .homeScreen:
+                    CaseLet(/Navigation.Path.State.homeScreen,
+                            action: Navigation.Path.Action.homeScreen)
+                    { store in
+                        HomeView(store: store)
+                    }
+                }
             }
         }
     }
