@@ -28,6 +28,7 @@ public struct NavigationRootView: View {
                             action: Navigation.Path.Action.homeScreen)
                     { store in
                         HomeView(store: store)
+                            .navigationBarBackButtonHidden()
                     }
                 }
             }

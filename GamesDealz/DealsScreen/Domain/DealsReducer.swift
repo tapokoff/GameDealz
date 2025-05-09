@@ -16,7 +16,11 @@ public struct DealsReducer {
 
     public enum Action: Equatable {
         case onAppear
+        case getDeals
+        case getDealsResult(TaskResult<[Deal]>)
     }
+    
+    @Dependency(\.dealsProvider) private var dealsProvider
 
     public init() {}
 
@@ -24,43 +28,18 @@ public struct DealsReducer {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                state.deals = [
-                    .init(title: "NBA 2K25",
-                          id: "wKOEl4x7sotYAaxRPLdNVe2WZumv5lcI16ncAUovpQM%3D1",
-                          storeId: "3",
-                          salePrice: "9.79",
-                          normalPrice: "69.99",
-                          savings: "86.012287",
-                          thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2878980/capsule_sm_120.jpg?t=1743778894"),
-                    .init(title: "NBA 2K25",
-                          id: "wKOEl4x7sotYAaxRPLdNVe2WZumv5lcI16ncAUovpQM%3D1",
-                          storeId: "3",
-                          salePrice: "9.79",
-                          normalPrice: "69.99",
-                          savings: "86.012287",
-                          thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2878980/capsule_sm_120.jpg?t=1743778894"),
-                    .init(title: "NBA 2K25",
-                          id: "wKOEl4x7sotYAaxRPLdNVe2WZumv5lcI16ncAUovpQM%3D1",
-                          storeId: "3",
-                          salePrice: "9.79",
-                          normalPrice: "69.99",
-                          savings: "86.012287",
-                          thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2878980/capsule_sm_120.jpg?t=1743778894"),
-                    .init(title: "NBA 2K25",
-                          id: "wKOEl4x7sotYAaxRPLdNVe2WZumv5lcI16ncAUovpQM%3D1",
-                          storeId: "3",
-                          salePrice: "9.79",
-                          normalPrice: "69.99",
-                          savings: "86.012287",
-                          thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2878980/capsule_sm_120.jpg?t=1743778894"),
-                    .init(title: "NBA 2K25",
-                          id: "wKOEl4x7sotYAaxRPLdNVe2WZumv5lcI16ncAUovpQM%3D1",
-                          storeId: "3",
-                          salePrice: "9.79",
-                          normalPrice: "69.99",
-                          savings: "86.012287",
-                          thumb: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2878980/capsule_sm_120.jpg?t=1743778894"),
-                ]
+                return .send(.getDeals)
+            case .getDeals:
+                return .run { send in
+                    await send(.getDealsResult(TaskResult {
+                        try await dealsProvider.getDeals()
+                    }))
+                }
+            case .getDealsResult(.success(let response)):
+                state.deals = response
+                return .none
+            case .getDealsResult(.failure(let _)):
+                // TODO: Present alert
                 return .none
             }
         }

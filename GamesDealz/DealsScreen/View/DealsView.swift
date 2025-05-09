@@ -12,7 +12,6 @@ import SwiftUI
 
 public struct DealsView: View {
     @Bindable private var store: StoreOf<DealsReducer>
-    @State private var loadingAnimation = false
 
     public init(store: StoreOf<DealsReducer>) {
         self.store = store
@@ -37,16 +36,13 @@ public struct DealsView: View {
                 List {
                     ForEach(0 ..< 15, id: \.self) { _ in
                         DealPlaceholderCell()
-                            .opacity(loadingAnimation ? 0.3 : 0.7)
+                            .opacity(store.deals.isEmpty ? 0.3 : 0.7)
                             .animation(
                                 .easeInOut(duration: 0.5)
                                     .repeatForever(autoreverses: true),
-                                value: loadingAnimation
+                                value: store.deals.isEmpty
                             )
                     }
-                }
-                .onAppear {
-                    store.send(.onAppear)
                 }
             } else {
                 List {
@@ -54,13 +50,16 @@ public struct DealsView: View {
                         cell(deal: item)
                     }
                 }
-                .onAppear {
-                    store.send(.onAppear)
+                .refreshable {
+                    store.send(.getDeals)
                 }
                 .frame(maxHeight: .infinity)
             }
         }
         .navigationTitle("Dealzzz")
+        .onAppear {
+            store.send(.onAppear)
+        }
     }
 
     @ViewBuilder

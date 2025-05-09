@@ -5,8 +5,8 @@
 //  Created by Daniil Balakiriev on 09.05.2025.
 //
 
-import Foundation
 import ComposableArchitecture
+import Foundation
 
 public struct StoreProvider: StoreProviderProtocol {
     private let baseUrl: URL?
@@ -30,7 +30,7 @@ public struct StoreProviderDependencyKey: DependencyKey {
 
 extension DependencyValues {
     var storeProvider: StoreProviderProtocol {
-      get { self[StoreProviderDependencyKey.self] }
-      set { self[StoreProviderDependencyKey.self] = newValue }
+        get { self[StoreProviderDependencyKey.self] }
+        set { self[StoreProviderDependencyKey.self] = newValue }
     }
 }

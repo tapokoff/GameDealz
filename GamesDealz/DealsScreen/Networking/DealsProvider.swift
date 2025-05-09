@@ -24,3 +24,14 @@ public struct DealsProvider: DealsProviderProtocol {
         try await DealsService.getDealDetail(id).perform(baseUrl: baseUrl, urlSession: urlSession)
     }
 }
+
+public struct DealsProviderDependencyKey: DependencyKey {
+    public static var liveValue: DealsProviderProtocol = DealsProvider(baseUrl: URL(string: "https://www.cheapshark.com/api"))
+}
+
+extension DependencyValues {
+    var dealsProvider: DealsProviderProtocol {
+        get { self[DealsProviderDependencyKey.self] }
+        set { self[DealsProviderDependencyKey.self] = newValue }
+    }
+}
