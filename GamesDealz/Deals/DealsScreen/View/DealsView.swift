@@ -22,7 +22,7 @@ public struct DealsView: View {
             HStack {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.secondary)
-                TextField("Search deals", text: .constant(""))
+                TextField("Search deals", text: $store.title)
                     .disableAutocorrection(true)
                     .foregroundColor(.primary)
             }
@@ -46,10 +46,24 @@ public struct DealsView: View {
                 }
             } else {
                 List {
-                    ForEach(store.deals, id: \.id) { item in
-                        cell(deal: item)
+                    ForEach(store.deals.indices, id: \.self) { idx in
+                        if store.deals.count != 0 {
+                            let deal = store.deals[idx]
+                            cell(deal: deal)
+                                .onAppear {
+                                    if idx == store.deals.count - 1
+                                        && store.deals.count % 60 == 0
+                                    {
+                                        store.send(.getMoreDeals)
+                                    }
+                                }
+                        } else {
+                            EmptyView()
+                        }
                     }
                 }
+                .id(store.title)
+                .listStyle(.plain)
                 .refreshable {
                     store.send(.getDeals)
                 }
@@ -76,20 +90,26 @@ public struct DealsView: View {
                 Text(deal.title)
                     .font(.system(size: 15, weight: .bold))
                     .padding(.leading)
-                HStack {
+                HStack(alignment: .bottom) {
                     Spacer()
-                    VStack(alignment: .trailing) {
-                        Text(deal.normalPrice)
-                            .strikethrough()
-                            .font(.system(size: 12))
-                        Text(deal.salePrice)
+                    if deal.salePrice == deal.normalPrice {
+                        Text("$\(deal.normalPrice)")
                             .font(.system(size: 14, weight: .bold))
+                    } else {
+                        VStack(alignment: .trailing) {
+                            Text("$\(deal.normalPrice)")
+                                .strikethrough()
+                                .font(.system(size: 12))
+                            Text("$\(deal.salePrice)")
+                                .font(.system(size: 14, weight: .bold))
+                        }
+                        Text("-\(deal.savings.prefix(2))%")
+                            .padding(3)
+                            .background(Color.green)
+                            .cornerRadius(4)
                     }
-                    Text("-\(deal.savings.prefix(2))%")
-                        .padding(3)
-                        .background(Color.green)
-                        .cornerRadius(4)
                 }
+                .frame(alignment: .bottom)
             }
         }
     }

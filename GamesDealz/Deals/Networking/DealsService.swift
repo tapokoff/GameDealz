@@ -8,7 +8,7 @@
 import Foundation
 
 public enum DealsService {
-    case getListOfDeals
+    case getListOfDeals(page: String, title: String)
     case getDealDetail(String)
 }
 
@@ -36,8 +36,11 @@ extension DealsService: ServiceProtocol {
     
     public var queryItems: [URLQueryItem]? {
         switch self {
-        case .getListOfDeals:
-            return .none
+        case .getListOfDeals(let pageNumber, let title):
+            return [
+                URLQueryItem(name: "pageNumber", value: pageNumber),
+                URLQueryItem(name: "title", value: title)
+            ]
         case .getDealDetail(let id):
             return [URLQueryItem(name: "id", value: id)]
         }

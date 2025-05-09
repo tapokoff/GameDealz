@@ -16,12 +16,14 @@ public struct DealsProvider: DealsProviderProtocol {
         self.baseUrl = baseUrl
     }
 
-    public func getDeals() async throws -> [Deal] {
-        try await DealsService.getListOfDeals.perform(baseUrl: baseUrl, urlSession: urlSession)
+    public func getDeals(page: String, title: String) async throws -> [Deal] {
+        try await DealsService.getListOfDeals(page: page, title: title)
+            .perform(baseUrl: baseUrl, urlSession: urlSession)
     }
 
     public func getDealDetail(id: String) async throws -> [Deal] {
-        try await DealsService.getDealDetail(id).perform(baseUrl: baseUrl, urlSession: urlSession)
+        try await DealsService.getDealDetail(id)
+            .perform(baseUrl: baseUrl, urlSession: urlSession)
     }
 }
 
