@@ -1,0 +1,34 @@
+//
+//  ContentView.swift
+//  GamesDealz
+//
+//  Created by Daniil Balakiriev on 09.05.2025.
+//
+
+import ComposableArchitecture
+import SwiftUI
+
+public struct NavigationRootView: View {
+    @Bindable var store: StoreOf<Navigation>
+
+    public init(store: StoreOf<Navigation>) {
+        self.store = store
+    }
+
+    public var body: some View {
+        WithPerceptionTracking {
+            NavigationStackStore(
+                self.store.scope(state: \.path, action: \.path)
+            ) {
+                SplashScreenView(store: store.scope(state: \.splashScreenState, action: \.splashScreenAction))
+            } destination: { _ in
+            }
+        }
+    }
+}
+
+#Preview {
+    NavigationRootView(store: .init(initialState: .init(), reducer: {
+        Navigation()
+    }))
+}
