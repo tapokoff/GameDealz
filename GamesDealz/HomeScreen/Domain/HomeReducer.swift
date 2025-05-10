@@ -11,16 +11,28 @@ import ComposableArchitecture
 public struct HomeReducer {
     @ObservableState
     public struct State: Equatable {
-        public var dealsState = DealsReducer.State()
+        public var dealsState: DealsReducer.State
         
         public var tabBarSelection: CustomTabViewElements = .deals
         
-        public init() {}
+        public var stores: [Store]
+        
+        public init(stores: [Store]) {
+            self.stores = stores
+            dealsState = .init(stores: stores)
+        }
     }
     
     public enum Action: Equatable, BindableAction {
         case dealsAction(DealsReducer.Action)
         case binding(BindingAction<State>)
+        
+        case delegate(Delegate)
+        
+        public enum Delegate: Equatable {
+            case openDealDetail(DealDetailReducer.State)
+            case showAlert
+        }
     }
     
     public init() {}
@@ -34,9 +46,18 @@ public struct HomeReducer {
         
         Reduce { _, action in
             switch action {
+            case .dealsAction(.delegate(let action)):
+                switch action {
+                case .openDealDetail(let state):
+                    return .send(.delegate(.openDealDetail(state)))
+                case .showAlert:
+                    return .none
+                }
             case .dealsAction:
                 return .none
             case .binding:
+                return .none
+            case .delegate:
                 return .none
             }
         }

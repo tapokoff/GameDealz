@@ -13,7 +13,21 @@ public extension ServiceProtocol {
         guard let queryItems else {
             return url
         }
-        return url.appending(queryItems: queryItems)
+//        return url.appending(queryItems: queryItems)
+        
+        /// EXPLANATION
+        /// This "fix" is neccesery for percentage encoded IDs
+        /// The problem is API returning percentage encoded strings with custom encoding `alphanumerics`, so i found this workaround
+        ///
+        /// Problematic example of Deal ID: 0f%2B4gT2VVUn4UcmFzPxXnuqoXKAOYoJ5mpFZRWNyohc%3D
+        var components = URLComponents(string: url.absoluteString)
+        components?.percentEncodedQueryItems = []
+        for item in queryItems {
+            let raw = item.value?.removingPercentEncoding
+            let encoded = raw?.addingPercentEncoding(withAllowedCharacters: .alphanumerics)
+            components?.percentEncodedQueryItems?.append(.init(name: item.name, value: encoded ?? ""))
+        }
+        return components?.url
     }
 
     func urlRequest(baseUrl: URL? = nil) throws -> URLRequest {

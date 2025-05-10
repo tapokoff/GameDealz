@@ -14,7 +14,7 @@ public struct DealGameInfo: Equatable, Codable {
     public let storeId: String
     public let name: String
     public let salePrice: String
-    public let steamRatingText: String
+    public let steamRatingText: String?
     public let steamRatingPercent: String
     public let metacriticScore: String
     public let metacriticLink: String?
@@ -39,4 +39,11 @@ public struct OtherDeals: Equatable, Codable {
     public let storeId: String
     public let salePrice: String
     public let retailPrice: String
+    
+    enum CodingKeys: String, CodingKey {
+        case dealId = "dealID"
+        case storeId = "storeID"
+        case salePrice
+        case retailPrice
+    }
 }

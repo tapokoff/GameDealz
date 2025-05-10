@@ -35,8 +35,24 @@ public struct Navigation {
             switch action {
             case .splashScreenAction(.delegate(let action)):
                 switch action {
-                case .openHomeScreen:
-                    state.path.append(.homeScreen(.init()))
+                case .openHomeScreen(let homeScreenState):
+                    state.path.append(.homeScreen(homeScreenState))
+                    return .none
+                case .showAlert:
+                    return .none
+                }
+            case .path(.element(id: _, action: .homeScreen(.delegate(let action)))):
+                switch action {
+                case .openDealDetail(let dealDetailState):
+                    state.path.append(.dealDetailScreen(dealDetailState))
+                    return .none
+                case .showAlert:
+                    return .none
+                }
+            case .path(.element(id: _, action: .dealDetailScreen(.delegate(let action)))):
+                switch action {
+                case .openDealDetail(let dealDetailState):
+                    state.path.append(.dealDetailScreen(dealDetailState))
                     return .none
                 case .showAlert:
                     return .none
@@ -56,11 +72,13 @@ public struct Navigation {
     public struct Path {
         @ObservableState
         public enum State: Equatable {
-            case homeScreen(HomeReducer.State = .init())
+            case homeScreen(HomeReducer.State)
+            case dealDetailScreen(DealDetailReducer.State)
         }
         
         public enum Action: Equatable {
             case homeScreen(HomeReducer.Action)
+            case dealDetailScreen(DealDetailReducer.Action)
         }
         
         public init() {}
@@ -68,6 +86,10 @@ public struct Navigation {
         public var body: some Reducer<State, Action> {
             Scope(state: \.homeScreen, action: \.homeScreen) {
                 HomeReducer()
+            }
+            
+            Scope(state: \.dealDetailScreen, action: \.dealDetailScreen) {
+                DealDetailReducer()
             }
         }
     }

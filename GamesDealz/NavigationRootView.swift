@@ -30,6 +30,12 @@ public struct NavigationRootView: View {
                         HomeView(store: store)
                             .navigationBarBackButtonHidden()
                     }
+                case .dealDetailScreen:
+                    CaseLet(/Navigation.Path.State.dealDetailScreen,
+                            action: Navigation.Path.Action.dealDetailScreen)
+                    { store in
+                        DealDetailView(store: store)
+                    }
                 }
             }
         }

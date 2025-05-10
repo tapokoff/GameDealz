@@ -21,7 +21,7 @@ public struct DealsProvider: DealsProviderProtocol {
             .perform(baseUrl: baseUrl, urlSession: urlSession)
     }
 
-    public func getDealDetail(id: String) async throws -> [Deal] {
+    public func getDealDetail(id: String) async throws -> DealDetail {
         try await DealsService.getDealDetail(id)
             .perform(baseUrl: baseUrl, urlSession: urlSession)
     }

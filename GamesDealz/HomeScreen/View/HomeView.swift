@@ -36,7 +36,7 @@ public struct HomeView: View {
 }
 
 #Preview {
-    HomeView(store: .init(initialState: .init(), reducer: {
+    HomeView(store: .init(initialState: .init(stores: .init()), reducer: {
         HomeReducer()
     }))
 }

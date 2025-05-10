@@ -19,65 +19,79 @@ public struct DealsView: View {
 
     public var body: some View {
         VStack {
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.secondary)
-                TextField("Search deals", text: $store.title)
-                    .disableAutocorrection(true)
-                    .foregroundColor(.primary)
-            }
-            .padding(10)
-            .background(Color(.systemGray6))
-            .cornerRadius(8)
-            .padding(.horizontal)
-            .padding(.top)
+            searchBar()
 
             if store.deals.isEmpty {
-                List {
-                    ForEach(0 ..< 15, id: \.self) { _ in
-                        DealPlaceholderCell()
-                            .opacity(store.deals.isEmpty ? 0.3 : 0.7)
-                            .animation(
-                                .easeInOut(duration: 0.5)
-                                    .repeatForever(autoreverses: true),
-                                value: store.deals.isEmpty
-                            )
-                    }
-                }
+                placeholderList()
             } else {
-                List {
-                    ForEach(store.deals.indices, id: \.self) { idx in
-                        if store.deals.count != 0 {
-                            let deal = store.deals[idx]
-                            cell(deal: deal)
-                                .onAppear {
-                                    if idx == store.deals.count - 1
-                                        && store.deals.count % 60 == 0
-                                    {
-                                        store.send(.getMoreDeals)
-                                    }
-                                }
-                        } else {
-                            EmptyView()
-                        }
-                    }
-                }
-                .id(store.title)
-                .listStyle(.plain)
-                .refreshable {
-                    store.send(.getDeals)
-                }
-                .frame(maxHeight: .infinity)
+                dealsList()
             }
         }
         .navigationTitle("Dealzzz")
-        .onAppear {
-            store.send(.onAppear)
+        .onAppear { store.send(.onAppear) }
+    }
+}
+
+private extension DealsView {
+    @ViewBuilder
+    func searchBar() -> some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.secondary)
+            TextField("Search deals", text: $store.title)
+                .disableAutocorrection(true)
+                .foregroundColor(.primary)
         }
+        .padding(10)
+        .background(Color(.systemGray6))
+        .cornerRadius(8)
+        .padding(.horizontal)
+        .padding(.top)
     }
 
     @ViewBuilder
-    private func cell(deal: Deal) -> some View {
+    func placeholderList() -> some View {
+        List {
+            ForEach(0..<15, id: \.self) { _ in
+                DealPlaceholderCell()
+                    .opacity(0.3)
+                    .animation(
+                        .easeInOut(duration: 0.5)
+                            .repeatForever(autoreverses: true),
+                        value: store.deals.isEmpty
+                    )
+            }
+        }
+        .listStyle(.plain)
+    }
+
+    @ViewBuilder
+    func dealsList() -> some View {
+        List {
+            ForEach(store.deals.indices, id: \.self) { idx in
+                dealRow(for: store.deals[idx], at: idx)
+            }
+        }
+        .id(store.title)
+        .listStyle(.plain)
+        .refreshable { store.send(.getDeals) }
+        .frame(maxHeight: .infinity)
+    }
+
+    @ViewBuilder
+    func dealRow(for deal: Deal, at idx: Int) -> some View {
+        dealCell(deal: deal)
+            .onAppear {
+                guard
+                    idx == store.deals.count - 1,
+                    store.deals.count % 60 == 0
+                else { return }
+                store.send(.getMoreDeals)
+            }
+    }
+
+    @ViewBuilder
+    func dealCell(deal: Deal) -> some View {
         HStack(alignment: .top) {
             KFImage(URL(string: deal.thumb))
                 .resizable()
@@ -90,29 +104,59 @@ public struct DealsView: View {
                 Text(deal.title)
                     .font(.system(size: 15, weight: .bold))
                     .padding(.leading)
-                HStack(alignment: .bottom) {
-                    Spacer()
-                    if deal.salePrice == deal.normalPrice {
-                        Text("$\(deal.normalPrice)")
-                            .font(.system(size: 14, weight: .bold))
-                    } else {
-                        VStack(alignment: .trailing) {
-                            Text("$\(deal.normalPrice)")
-                                .strikethrough()
-                                .font(.system(size: 12))
-                            Text("$\(deal.salePrice)")
-                                .font(.system(size: 14, weight: .bold))
-                        }
-                        Text("-\(deal.savings.prefix(2))%")
-                            .padding(3)
-                            .background(Color.green)
-                            .cornerRadius(4)
-                    }
-                }
-                .frame(alignment: .bottom)
+
+                priceSection(for: deal)
             }
         }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            store.send(
+                .delegate(
+                    .openDealDetail(
+                        .init(dealId: deal.id, stores: store.stores)
+                    )
+                )
+            )
+        }
     }
+
+    @ViewBuilder
+    func priceSection(for deal: Deal) -> some View {
+        HStack(alignment: .bottom) {
+            let sellerStore = store.stores.first { $0.id == deal.storeId }
+            KFImage(URL(string: sellerStore?.images.iconImage ?? ""))
+                .padding(.leading)
+
+            Spacer()
+
+            if deal.salePrice == deal.normalPrice {
+                Text("$\(deal.normalPrice)")
+                    .font(.system(size: 14, weight: .bold))
+            } else {
+                VStack(alignment: .trailing) {
+                    Text("$\(deal.normalPrice)")
+                        .strikethrough()
+                        .font(.system(size: 12))
+                    Text("$\(deal.salePrice)")
+                        .font(.system(size: 14, weight: .bold))
+                }
+                Text("-\(deal.savings.prefix(2))%")
+                    .padding(3)
+                    .background(Color.green)
+                    .cornerRadius(4)
+            }
+        }
+        .frame(alignment: .bottom)
+    }
+}
+
+#Preview {
+    DealsView(
+        store: .init(
+            initialState: DealsReducer.State(stores: .init()),
+            reducer: { DealsReducer() }
+        )
+    )
 }
 
 private struct DealPlaceholderCell: View {
@@ -153,13 +197,4 @@ private struct DealPlaceholderCell: View {
             .padding(.vertical, 8)
         }
     }
-}
-
-#Preview {
-    DealsView(
-        store: .init(
-            initialState: DealsReducer.State(),
-            reducer: { DealsReducer() }
-        )
-    )
 }

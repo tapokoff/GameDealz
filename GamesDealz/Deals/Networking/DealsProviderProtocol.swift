@@ -7,5 +7,5 @@
 
 public protocol DealsProviderProtocol {
     func getDeals(page: String, title: String) async throws -> [Deal]
-    func getDealDetail(id: String) async throws -> [Deal]
+    func getDealDetail(id: String) async throws -> DealDetail
 }

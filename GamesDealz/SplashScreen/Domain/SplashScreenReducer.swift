@@ -19,13 +19,13 @@ public struct SplashScreenReducer {
 
         case delegate(Delegate)
 
-        public enum Delegate {
-            case openHomeScreen
+        public enum Delegate: Equatable {
+            case openHomeScreen(HomeReducer.State)
             case showAlert
         }
     }
 
-    @Dependency(\.storeRepository) private var storeRepository
+    @Dependency(\.storeProvider) private var storeProvider
 
     public init() {}
 
@@ -35,8 +35,8 @@ public struct SplashScreenReducer {
             case .onAppear:
                 return .run { send in
                     do {
-                        try await storeRepository.refreshStores()
-                        await send(.delegate(.openHomeScreen))
+                        let response = try await storeProvider.getStores()
+                        await send(.delegate(.openHomeScreen(.init(stores: response))))
                     } catch {
                         await send(.delegate(.showAlert))
                     }

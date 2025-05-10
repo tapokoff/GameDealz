@@ -18,11 +18,19 @@ public struct Store: Equatable, Codable {
 }
 
 public struct StoreImages: Equatable, Codable {
-    public let logoPath: String
-    public let iconPath: String
+    private let logoPath: String
+    private let iconPath: String
     
     enum CodingKeys: String, CodingKey {
         case logoPath = "logo"
         case iconPath = "icon"
+    }
+    
+    public var logoImage: String {
+        "https://www.cheapshark.com" + logoPath
+    }
+    
+    public var iconImage: String {
+        "https://www.cheapshark.com" + iconPath
     }
 }

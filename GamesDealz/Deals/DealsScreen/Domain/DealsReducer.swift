@@ -17,8 +17,14 @@ public struct DealsReducer {
     public struct State: Equatable {
         public var deals: [Deal] = []
         public var pageNumber = 0
+        
+        public var stores: [Store]
 
         public var title: String = ""
+        
+        public init(stores: [Store]) {
+            self.stores = stores
+        }
     }
 
     public enum Action: Equatable, BindableAction {
@@ -31,6 +37,13 @@ public struct DealsReducer {
         case getDealsResult(TaskResult<[Deal]>)
 
         case binding(BindingAction<State>)
+        
+        case delegate(Delegate)
+        
+        public enum Delegate: Equatable {
+            case openDealDetail(DealDetailReducer.State)
+            case showAlert
+        }
     }
 
     @Dependency(\.dealsProvider) private var dealsProvider
@@ -75,6 +88,8 @@ public struct DealsReducer {
                     .debounce(id: DebounceId.searchDebounce, for: .seconds(0.5), scheduler: mainQueue)
                     .cancellable(id: DebounceId.searchDebounce)
             case .binding:
+                return .none
+            case .delegate:
                 return .none
             }
         }
