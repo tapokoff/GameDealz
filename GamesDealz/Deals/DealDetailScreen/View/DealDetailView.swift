@@ -1,3 +1,10 @@
+//
+//  HomeScreenReducer.swift
+//  GamesDealz
+//
+//  Created by Daniil Balakiriev on 09.05.2025.
+//
+
 import ComposableArchitecture
 import Kingfisher
 import SwiftUI
@@ -147,6 +154,6 @@ private extension DealDetailView {
 #Preview {
     DealDetailView(store: .init(initialState: .init(dealId: "DQ%2BYLI9do4mm0H2%2BDUd6npgoQoK8bseNvyjJe%2B%2F3dEo%3D",
                                                     stores: .init()), reducer: {
-        DealDetailReducer()
-    }))
+            DealDetailReducer()
+        }))
 }

@@ -22,7 +22,13 @@ public struct DealsView: View {
             searchBar()
 
             if store.deals.isEmpty {
-                placeholderList()
+                if store.isLoading {
+                    placeholderList()
+                } else {
+                    Spacer()
+                    Text("Nothing found...")
+                    Spacer()
+                }
             } else {
                 dealsList()
             }
@@ -69,7 +75,11 @@ private extension DealsView {
     func dealsList() -> some View {
         List {
             ForEach(store.deals.indices, id: \.self) { idx in
-                dealRow(for: store.deals[idx], at: idx)
+                if store.deals.count == 0 {
+                    EmptyView()
+                } else {
+                    dealRow(for: store.deals[idx], at: idx)
+                }
             }
         }
         .id(store.title)

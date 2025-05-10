@@ -12,6 +12,7 @@ public struct HomeReducer {
     @ObservableState
     public struct State: Equatable {
         public var dealsState: DealsReducer.State
+        public var gamesState: GamesReducer.State
         
         public var tabBarSelection: CustomTabViewElements = .deals
         
@@ -20,11 +21,13 @@ public struct HomeReducer {
         public init(stores: [Store]) {
             self.stores = stores
             dealsState = .init(stores: stores)
+            gamesState = .init(stores: stores)
         }
     }
     
     public enum Action: Equatable, BindableAction {
         case dealsAction(DealsReducer.Action)
+        case gamesAction(GamesReducer.Action)
         case binding(BindingAction<State>)
         
         case delegate(Delegate)
@@ -42,6 +45,10 @@ public struct HomeReducer {
             DealsReducer()
         }
         
+        Scope(state: \.gamesState, action: \.gamesAction) {
+            GamesReducer()
+        }
+        
         BindingReducer()
         
         Reduce { _, action in
@@ -53,6 +60,15 @@ public struct HomeReducer {
                 case .showAlert:
                     return .none
                 }
+            case .gamesAction(.delegate(let action)):
+                switch action {
+                case .openDealDetail(let state):
+                    return .send(.delegate(.openDealDetail(state)))
+                case .showAlert:
+                    return .none
+                }
+            case .gamesAction:
+                return .none
             case .dealsAction:
                 return .none
             case .binding:

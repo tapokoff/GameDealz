@@ -22,7 +22,7 @@ public struct HomeView: View {
                 case .deals:
                     DealsView(store: store.scope(state: \.dealsState, action: \.dealsAction))
                 case .games:
-                    EmptyView()
+                    GamesView(store: store.scope(state: \.gamesState, action: \.gamesAction))
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

@@ -18,6 +18,8 @@ public struct DealsReducer {
         public var deals: [Deal] = []
         public var pageNumber = 0
         
+        public var isLoading = false
+        
         public var stores: [Store]
 
         public var title: String = ""
@@ -60,6 +62,7 @@ public struct DealsReducer {
                 return .send(.getDeals)
             case .getDeals:
                 state.pageNumber = 0
+                state.isLoading = true
                 return .run { [state] send in
                     await send(.getDealsResult(TaskResult {
                         try await dealsProvider.getDeals(page: "\(state.pageNumber)", title: state.title)
@@ -67,11 +70,14 @@ public struct DealsReducer {
                 }
             case .getDealsResult(.success(let response)):
                 state.deals = response
+                state.isLoading = false
                 return .none
             case .getDealsResult(.failure):
+                state.isLoading = false
                 // TODO: Present alert
                 return .none
             case .getMoreDeals:
+                state.isLoading = true
                 state.pageNumber += 1
                 return .run { [state] send in
                     await send(.getMoreDealsResult(TaskResult {
@@ -79,9 +85,11 @@ public struct DealsReducer {
                     }))
                 }
             case .getMoreDealsResult(.success(let response)):
+                state.isLoading = false
                 state.deals.append(contentsOf: response)
                 return .none
             case .getMoreDealsResult(.failure):
+                state.isLoading = false
                 return .none
             case .binding(\.title):
                 return .send(.getDeals)
